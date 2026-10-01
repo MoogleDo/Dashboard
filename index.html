@@ -188,7 +188,7 @@ document.addEventListener('click',e=>{if(e.target.id=='gm'||e.target.closest('#g
 document.addEventListener('keydown',e=>{if(e.key=='Escape')closePop()});
 /* ---- نمای مدیریتی ---- */
 function T0(){
-const od=D.od.map(o=>{const ac=D.oa.filter(x=>x.id==o.id),sp=sm(ac,x=>x.h),la=Math.max(o.ld||0,...ac.map(x=>x.d)),idle=dd(la,R),stag=Math.max(0,idle-o.al),pcr=o.cap?sp/o.cap:0,ov=!o.dv&&R>o.nd,rs=[];
+const od=D.od.map(o=>{const ac=D.oa.filter(x=>x.id==o.id&&x.d<=R),sp=sm(ac,x=>x.h),la=Math.max(o.ld||0,...ac.map(x=>x.d)),idle=dd(la,R),stag=Math.max(0,idle-o.al),pcr=o.cap?sp/o.cap:0,ov=!o.dv&&R>o.nd,rs=[];
 if(pcr>1)rs.push('عبور از سقف بودجه');if(stag>0)rs.push('رکود '+fa(stag,0)+' روز');if(ov)rs.push('گذشتن از تاریخ نیاز');
 const hi=rs.length>0,warn=!hi&&(pcr>=.8||idle>=o.al*.7||dd(R,o.nd)<=14);
 return{...o,sp,stag,idle,pcr,rs,hi,warn}});
@@ -246,9 +246,9 @@ $('#v').innerHTML=`<div class=sh><b>برنامه‌ریزی تولید</b><span>
 <div class=c><h3>مقایسه تعداد اقلام محاسبه‌شده به تفکیک روش برنامه‌ریزی سفارش</h3><div style="height:${Math.max(260,a.length*40)}px"><canvas id=j></canvas></div></div>`;
 ch('j','bar',a.map(p=>p.p),[ds('MRP',a.map(p=>p.mrp),0),ds('EOQ',a.map(p=>p.eoq),1),ds('MinMax',a.map(p=>p.mm),2),ds('تامین‌شده',a.map(p=>p.sup),3)],{h:true})}
 /* ---- سفارشات کار ---- */
-function T4(){const a=D.od.map(o=>{const ac=D.oa.filter(x=>x.id==o.id),sp=sm(ac,x=>x.h),la=Math.max(o.ld||0,...ac.map(x=>x.d)),idle=dd(la,R),stag=Math.max(0,idle-o.al),pc=sp/o.cap,ov=!o.dv&&R>o.nd,rs=[];
+function T4(){const a=D.od.map(o=>{const ac=D.oa.filter(x=>x.id==o.id),acP=ac.filter(x=>x.d<=R),sp=sm(acP,x=>x.h),la=Math.max(o.ld||0,...acP.map(x=>x.d)),idle=dd(la,R),stag=Math.max(0,idle-o.al),pc=sp/o.cap,ov=!o.dv&&R>o.nd,rs=[];
 if(pc>1)rs.push('عبور از سقف بودجه');if(stag>0)rs.push('رکود');if(ov)rs.push('گذشتن از تاریخ نیاز');
-const r=rs.length?['بالا','hi']:(pc>=.8||idle>=o.al*.7||dd(R,o.nd)<=14)?['متوسط','md']:['پایین','lo'];return{...o,ac,sp,la,idle,stag,pc,r,rs,last:ac.reduce((b,x)=>!b||x.d>=b.d?x:b,null)}});
+const r=rs.length?['بالا','hi']:(pc>=.8||idle>=o.al*.7||dd(R,o.nd)<=14)?['متوسط','md']:['پایین','lo'];return{...o,ac,sp,la,idle,stag,pc,r,rs,last:acP.reduce((b,x)=>!b||x.d>=b.d?x:b,null)}});
 RAW.od_count=a.length;RAW.od_cap=sm(a,o=>o.cap);RAW.od_spent=sm(a,o=>o.sp);RAW.od_risk=a.filter(o=>o.r[1]=='hi').length;RAW.od_stag=a.filter(o=>o.stag>0).length;
 const oaAct=regActs(futureOrderActivities()),oaSplit=actSplit(oaAct);
 $('#v').innerHTML=`<p class=nt>ریسک: «بالا» اگر بودجه از سقف عبور کند، رکود از حد مجاز بگذرد یا تاریخ نیاز سپری شود؛ «متوسط» اگر مصرف بودجه ≥۸۰٪، نزدیک حد رکود یا کمتر از ۱۴ روز تا نیاز باشد.</p><div class=k>${K('تعداد سفارش کار',fa(a.length),'',null,a.length,'od_count')}${K('مجموع بودجه زمانی',fa(sm(a,o=>o.cap),0)+' ساعت','',null,sm(a,o=>o.cap),'od_cap')}${K('زمان مصرف‌شده',fa(sm(a,o=>o.sp),0)+' ساعت','',null,sm(a,o=>o.sp),'od_spent')}${K('سفارش پرریسک',fa(a.filter(o=>o.r[1]=='hi').length),'',a.length?a.filter(o=>o.r[1]=='hi').length/a.length*100:0,a.filter(o=>o.r[1]=='hi').length,'od_risk')}${K('سفارش دچار رکود',fa(a.filter(o=>o.stag>0).length),'',a.length?a.filter(o=>o.stag>0).length/a.length*100:0,a.filter(o=>o.stag>0).length,'od_stag')}</div>

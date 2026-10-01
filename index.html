@@ -183,7 +183,10 @@ const pri=$('#nt-pri').value,author=$('#nt-author').value.trim()||'—';btn.disa
 try{await DBX.collection('notes').add({type,refId,refLabel,text,priority:pri,author,created:Date.now(),resolved:false});$('#nt-text').value='';msg.textContent='یادداشت با موفقیت ثبت شد.';msg.style.color='#10b981'}catch(e){msg.textContent='ثبت یادداشت با خطا مواجه شد.';msg.style.color='#ef4444'}
 btn.disabled=false}
 async function toggleNoteResolved(id,val){if(!DBX)return;try{await DBX.collection('notes').doc(id).update({resolved:val})}catch(e){}}
-function openGeneralNotePop(){$('#gmt').textContent='یادداشت یا دستور مدیریتی جدید';$('#gmc').innerHTML=noteFormHtml('general',null,null);$('#gm').hidden=false;$('#gmc').scrollTop=0}
+function openGeneralNotePop(){
+const oaF=D.oa.filter(x=>x.d>R).map(x=>{const o=D.od.find(y=>y.id==x.id);return{d:x.d,ref:(o?o.id+' - '+o.t:String(x.id)),a:x.a,h:x.h}}),paF=(D.pa||[]).filter(x=>x.d>R).map(x=>{const p=D.pl.find(y=>y.no==x.no);return{d:x.d,ref:(p?p.no+' - '+p.p:String(x.no)),a:x.a,h:x.h}}),allF=[...oaF,...paF].sort((a,b)=>a.d-b.d),h3='<h3 style="font-size:13px;margin:14px 0 6px">';
+const sec=allF.length?h3+'فعالیت‌های برنامه‌ریزی‌شده (آینده) ('+fa(allF.length)+')</h3>'+tbl(['تاریخ','مربوط به','فعالیت','ساعت'],allF.map(x=>[fd(x.d),x.ref,x.a,x.h?fa(x.h,1):'—'])):'';
+$('#gmt').textContent='یادداشت یا دستور مدیریتی جدید';$('#gmc').innerHTML=sec+noteFormHtml('general',null,null);$('#gm').hidden=false;$('#gmc').scrollTop=0}
 document.addEventListener('click',e=>{if(e.target.id=='gm'||e.target.closest('#gmx'))closePop()});
 document.addEventListener('keydown',e=>{if(e.key=='Escape')closePop()});
 /* ---- نمای مدیریتی ---- */

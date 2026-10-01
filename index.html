@@ -202,7 +202,7 @@ od.filter(o=>o.warn).forEach(o=>rows.push({alert:'نزدیک به ریسک: '+o.
 rows.sort((a,b)=>(a.sev=='hi'?0:1)-(b.sev=='hi'?0:1));
 const critN=rows.filter(r=>r.sev=='hi').length,warnN=rows.filter(r=>r.sev=='md').length,okN=Math.max(0,od.length-critN-warnN);
 T0_OD=od;T0_ROWS=rows;
-const actAll=regActs([...futureOrderActivities(),...futurePlanActivities()]);
+const actAll=regActs(futurePlanActivities());
 const actSplitRes=actSplit(actAll),actDoneN=actSplitRes.done.length,actPlannedN=actSplitRes.planned.length,actNearN=actSplitRes.planned.filter(x=>dd(R,x.d)<=7).length;
 const cc=(l,v,u,cls,fn)=>`<div class="kc cb-${cls}"${fn?` style="cursor:pointer" onclick="${fn}"`:''}><span>${l}</span><b>${fa(v)} <i style="font-style:normal;font-size:13px;color:var(--mu)">${u}</i></b></div>`;
 const pl=D.pl.map(p=>{const done=p.pd!=null,left=dd(R,p.nd),ov=!done&&R>p.nd,st=done?['تولید شده','lo']:(ov?['عقب‌افتاده','hi']:['در برنامه','gy']);return{...p,done,left,ov,st}});
@@ -216,7 +216,7 @@ $('#v').innerHTML=`<div class=sh><b>خلاصه اقدامات اجرایی</b><s
 <div class=k>${K('برگه دستی بدون سند سیستمی (سند باز)',fa(bo.length),'',null,null,null,'openBoPop()')}${K('میانگین فاصله تا ثبت سیستمی',gp.length?fa(avg(gp,x=>x.g))+' روز':'—','',null,null,null,'openGpPop()')}${K('اسناد دستی صادر شده در هفته گذشته',fa(lw),'',null,null,null,'openLwPop()')}</div>
 <div class=c style="margin-bottom:12px"><h3>هشدارهای عملیاتی</h3>${rows.length?tbl(['هشدار','واحد','وضعیت','مدت','اثر عملیاتی','اقدام پیشنهادی'],rows.map(r=>[rowAlertCell(r),r.unit,bd(r.sev=='hi'?'بحرانی':'هشدار',r.sev),r.delay,r.impact,r.action])):'<p class=nt>در حال حاضر هشدار عملیاتی ثبت‌شده‌ای وجود ندارد.</p>'}<p class=nt style="margin:8px 0 0">برای دیدن فعالیت‌های برنامه‌ریزی‌شده (آینده) و رویدادهای گذشتهٔ هر مورد، روی عنوان آن کلیک کنید؛ برای محصولات، روی کارت آن در «خلاصه وضعیت محصولات» کلیک کنید.</p></div>
 <div class=c style="margin-bottom:12px"><h3>خلاصه وضعیت محصولات</h3>${pl.length?`<div class=k style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">${J(pl.map(plCard))}</div>`:'<p class=nt>داده‌ای در برنامه‌ریزی تولید ثبت نشده است.</p>'}</div>
-<div class=c style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px"><h3 style="margin:0">فعالیت‌های برنامه‌ریزی‌شده آینده</h3><span style="font-size:11px;color:var(--mu)">سفارشات کار و برنامه‌ریزی تولید — تاریخ بعد از امروز</span></div>
+<div class=c style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px"><h3 style="margin:0">فعالیت‌های برنامه‌ریزی‌شده محصولات (آینده)</h3><span style="font-size:11px;color:var(--mu)">برنامه‌ریزی تولید — تاریخ بعد از امروز</span></div>
 <div class=k>${K('کل فعالیت‌های آینده',fa(actAll.length))}${K('باقی‌مانده',fa(actPlannedN))}${K('انجام‌شده',fa(actDoneN))}${K('نزدیک (تا ۷ روز آینده)',fa(actNearN),'',actPlannedN?actNearN/actPlannedN*100:0)}</div>
 <div class=sh style="margin:10px 0 6px"><b style="font-size:13px">برنامه‌ریزی‌شده (انجام‌نشده)</b></div>${actTable(actSplitRes.planned,false)}
 <div class=sh style="margin:14px 0 6px"><b style="font-size:13px">انجام‌شده</b></div>${actTable(actSplitRes.done,true)}

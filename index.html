@@ -145,6 +145,15 @@ function openBoPop(){const rows=D.io.filter(r=>r.k&&r.k!='سیستمی'&&r.st=='
 function openGpPop(){const rows=D.io.filter(r=>r.rg&&r.k!='سیستمی');openListPop('میانگین فاصله تا ثبت سیستمی — جزئیات اسناد',['سریال','تاریخ سند','تاریخ ثبت سیستمی','فاصله (روز)'],rows.map(r=>[fa(r.sr,0),fd(r.d),fd(r.rg),fa(dd(r.d,r.rg),0)]))}
 function openLwPop(){const rows=D.io.filter(r=>r.k&&r.k!='سیستمی'&&dd(r.d,R)>=0&&dd(r.d,R)<=7);openListPop('اسناد دستی صادر شده در هفته گذشته',['تاریخ','نوع','انبار','طرف مقابل'],rows.map(r=>[fd(r.d),r.k,r.w,r.l]))}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* ---- فعالیت‌های برنامه‌ریزی‌شده آینده (تیک انجام) ---- */
+function hashKey(s){let h=0;for(let i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(i);h|=0}return 'k'+(h>>>0).toString(36)+s.length.toString(36)}
+function futureOrderActivities(){return D.oa.filter(x=>x.d>R).map(x=>{const o=D.od.find(y=>y.id==x.id);const k=hashKey('oa|'+x.id+'|'+x.d+'|'+x.a);return{k,kind:'oa',refId:x.id,refLabel:(o?o.id+' - '+o.t:String(x.id)),d:x.d,a:x.a,h:x.h}})}
+function futurePlanActivities(){return(D.pa||[]).filter(x=>x.d>R).map(x=>{const p=D.pl.find(y=>y.no==x.no);const k=hashKey('pa|'+x.no+'|'+x.d+'|'+x.a);return{k,kind:'pa',refId:x.no,refLabel:(p?p.no+' - '+p.p:String(x.no)),d:x.d,a:x.a,h:x.h}})}
+function regActs(items){items.forEach(x=>ACT_IDX[x.k]=x);return items}
+const actRow=(x,isDone)=>`<tr><td><input type=checkbox ${isDone?'checked':''} onchange="toggleActivityDone('${x.k}',this.checked)"></td><td>${fd(x.d)}</td><td>${esc(x.refLabel)}</td><td style="white-space:normal;max-width:320px">${esc(x.a)}</td><td>${x.h?fa(x.h,1)+' ساعت':'—'}</td></tr>`;
+const actTable=(items,isDone)=>items.length?`<div class=tw><table><tr><th></th><th>تاریخ</th><th>مربوط به</th><th>فعالیت</th><th>ساعت</th></tr>${J(items.map(x=>actRow(x,isDone)))}</table></div>`:'<p class=nt>موردی برای نمایش نیست.</p>';
+const actSplit=items=>({planned:items.filter(x=>!DONE[x.k]).sort((p,q)=>p.d-q.d),done:items.filter(x=>DONE[x.k]).sort((p,q)=>(DONE[q.k].doneAt||0)-(DONE[p.k].doneAt||0))});
+async function toggleActivityDone(k,val){if(!DBX)return;const item=ACT_IDX[k];try{if(val){await DBX.collection('activity_done').doc(k).set({kind:item?item.kind:'',refId:item&&item.refId!=null?String(item.refId):'',refLabel:item?item.refLabel:'',d:item?item.d:null,a:item?item.a:'',h:item&&item.h!=null?item.h:null,doneAt:Date.now()})}else{await DBX.collection('activity_done').doc(k).delete()}}catch(e){}}
 // --- FIREBASE CONFIG ---
 // راهنمای ساخت این مقادیر در README مخزن گیت‌هاب توضیح داده شده.
 // این مقادیر شناسه عمومی پروژه هستند نه رمز؛ اما دسترسی نوشتن با قوانین امنیتی Firestore کنترل می‌شود.
@@ -156,13 +165,14 @@ const firebaseConfig={
   messagingSenderId:"42539678978",
   appId:"1:42539678978:web:a03724e9e76be01417561b"
 };
-let DBX=null,NOTES=[];
+let DBX=null,NOTES=[];let DONE={};let ACT_IDX={};
 function initDb(){
   try{
     if(!firebaseConfig.apiKey||typeof firebase==='undefined')return;
     firebase.initializeApp(firebaseConfig);
     DBX=firebase.firestore();
     DBX.collection('notes').orderBy('created','desc').limit(200).onSnapshot(snap=>{NOTES=snap.docs.map(d=>({id:d.id,...d.data()}));if(T==0)render()},()=>{});
+    DBX.collection('activity_done').onSnapshot(snap=>{DONE={};snap.docs.forEach(d=>DONE[d.id]=d.data());if(T==0||T==3||T==4)render()},()=>{});
   }catch(e){}
 }
 const noteFormHtml=(type,refId,refLabel)=>`<h3 style="font-size:13px;margin:14px 0 6px">افزودن یادداشت یا دستور مدیریتی</h3><div style="display:flex;flex-direction:column;gap:8px"><textarea id=nt-text rows=3 style="width:100%;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg2);color:var(--tx);font-family:inherit;resize:vertical;box-sizing:border-box" placeholder="متن یادداشت یا دستور..."></textarea><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select id=nt-pri style="padding:6px 8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg2);color:var(--tx)"><option value=normal>عادی</option><option value=urgent>فوری</option></select><input id=nt-author placeholder="نام شما (اختیاری)" style="flex:1;min-width:140px;padding:6px 8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg2);color:var(--tx);box-sizing:border-box"><button id=nt-submit onclick="submitNote(this)" data-type="${esc(type)}" data-refid="${refId!=null?esc(String(refId)):''}" data-reflabel="${esc(refLabel||'')}" style="padding:6px 16px;border-radius:8px;border:none;background:var(--pr);color:#fff;cursor:pointer;font-family:inherit">ثبت یادداشت</button></div><div id=nt-msg style="font-size:12px;color:var(--mu);min-height:16px"></div></div>`;
@@ -188,6 +198,8 @@ od.filter(o=>o.warn).forEach(o=>rows.push({alert:'نزدیک به ریسک: '+o.
 rows.sort((a,b)=>(a.sev=='hi'?0:1)-(b.sev=='hi'?0:1));
 const critN=rows.filter(r=>r.sev=='hi').length,warnN=rows.filter(r=>r.sev=='md').length,okN=Math.max(0,od.length-critN-warnN);
 T0_OD=od;T0_ROWS=rows;
+const actAll=regActs([...futureOrderActivities(),...futurePlanActivities()]);
+const actSplitRes=actSplit(actAll),actDoneN=actSplitRes.done.length,actPlannedN=actSplitRes.planned.length,actNearN=actSplitRes.planned.filter(x=>dd(R,x.d)<=7).length;
 const cc=(l,v,u,cls,fn)=>`<div class="kc cb-${cls}"${fn?` style="cursor:pointer" onclick="${fn}"`:''}><span>${l}</span><b>${fa(v)} <i style="font-style:normal;font-size:13px;color:var(--mu)">${u}</i></b></div>`;
 const pl=D.pl.map(p=>{const done=p.pd!=null,left=dd(R,p.nd),ov=!done&&R>p.nd,st=done?['تولید شده','lo']:(ov?['عقب‌افتاده','hi']:['در برنامه','gy']);return{...p,done,left,ov,st}});
 const plCard=p=>`<div class=kc style="cursor:pointer" onclick="openPlPop(${p.no})"><b style="font-size:14px;margin:0 0 4px;display:block">${p.p}</b><div style="font-size:12px;color:var(--mu);margin-bottom:6px">${p.g} — ${fa(p.q,0)} عدد سفارش</div>${bd(...p.st)} <span style="font-size:12px;color:var(--mu);margin-right:4px">${p.done?'تولید شده: '+fa(p.pq,0)+' عدد':(p.ov?fa(Math.abs(p.left),0)+' روز از تاریخ نیاز گذشته':fa(p.left,0)+' روز تا تاریخ نیاز')}</span></div>`;
@@ -200,6 +212,11 @@ $('#v').innerHTML=`<div class=sh><b>خلاصه اقدامات اجرایی</b><s
 <div class=k>${K('برگه دستی بدون سند سیستمی (سند باز)',fa(bo.length),'',null,null,null,'openBoPop()')}${K('میانگین فاصله تا ثبت سیستمی',gp.length?fa(avg(gp,x=>x.g))+' روز':'—','',null,null,null,'openGpPop()')}${K('اسناد دستی صادر شده در هفته گذشته',fa(lw),'',null,null,null,'openLwPop()')}</div>
 <div class=c style="margin-bottom:12px"><h3>هشدارهای عملیاتی</h3>${rows.length?tbl(['هشدار','واحد','وضعیت','مدت','اثر عملیاتی','اقدام پیشنهادی'],rows.map(r=>[r.alert,r.unit,bd(r.sev=='hi'?'بحرانی':'هشدار',r.sev),r.delay,r.impact,r.action])):'<p class=nt>در حال حاضر هشدار عملیاتی ثبت‌شده‌ای وجود ندارد.</p>'}</div>
 <div class=c style="margin-bottom:12px"><h3>خلاصه وضعیت محصولات</h3>${pl.length?`<div class=k style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">${J(pl.map(plCard))}</div>`:'<p class=nt>داده‌ای در برنامه‌ریزی تولید ثبت نشده است.</p>'}</div>
+<div class=c style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px"><h3 style="margin:0">فعالیت‌های برنامه‌ریزی‌شده آینده</h3><span style="font-size:11px;color:var(--mu)">سفارشات کار و برنامه‌ریزی تولید — تاریخ بعد از امروز</span></div>
+<div class=k>${K('کل فعالیت‌های آینده',fa(actAll.length))}${K('باقی‌مانده',fa(actPlannedN))}${K('انجام‌شده',fa(actDoneN))}${K('نزدیک (تا ۷ روز آینده)',fa(actNearN),'',actPlannedN?actNearN/actPlannedN*100:0)}</div>
+<div class=sh style="margin:10px 0 6px"><b style="font-size:13px">برنامه‌ریزی‌شده (انجام‌نشده)</b></div>${actTable(actSplitRes.planned,false)}
+<div class=sh style="margin:14px 0 6px"><b style="font-size:13px">انجام‌شده</b></div>${actTable(actSplitRes.done,true)}
+</div>
 <div class=c><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px"><h3 style="margin:0">یادداشت‌های مدیریت</h3><button onclick="openGeneralNotePop()" style="font-size:12px;padding:5px 12px;border-radius:8px;border:none;background:var(--pr);color:#fff;cursor:pointer;font-family:inherit">+ یادداشت جدید</button></div>${NOTES.length?`<div class=tw><table><tr><th>اولویت</th><th>مورد مرتبط</th><th>متن</th><th>ثبت‌کننده</th><th>زمان</th><th></th></tr>${J(NOTES.map(noteRow))}</table></div>`:'<p class=nt>هنوز یادداشتی ثبت نشده است. روی هر سفارش کار یا محصول، یا با دکمه بالا، می‌توانید یادداشت یا دستور جدید ثبت کنید.</p>'}</div>`}
 
 /* ---- انبار ---- */
@@ -217,8 +234,13 @@ function T2(){$('#v').innerHTML=`<p class=nt>این بخش (تولید) به‌�
 function T3(){const a=D.pl.map(p=>{const done=p.pd!=null,left=dd(R,p.nd),ov=!done&&R>p.nd,st=done?['تولید شده ('+fa(p.pq,0)+')','lo']:(ov?['عقب‌افتاده از تاریخ نیاز','hi']:['در برنامه','gy']);return{...p,done,left,ov,st}});
 const totQ=sm(a,p=>p.q),doneN=a.filter(p=>p.done).length,ovN=a.filter(p=>p.ov).length;
 RAW.pl_count=a.length;RAW.pl_done=doneN;RAW.pl_ov=ovN;
+const paAct=regActs(futurePlanActivities()),paSplit=actSplit(paAct);
 $('#v').innerHTML=`<div class=sh><b>برنامه‌ریزی تولید</b><span>PLANING</span></div>
 <div class=k>${K('تعداد سفارش تولید',fa(a.length),'',null,a.length,'pl_count')}${K('جمع تعداد سفارش',fa(totQ,0))}${K('سفارش‌های تولیدشده',fa(doneN)+' از '+fa(a.length),'',null,doneN,'pl_done')}${K('عقب‌افتاده از تاریخ نیاز',fa(ovN),'',a.length?ovN/a.length*100:0,ovN,'pl_ov')}</div>
+<div class=c style="margin-bottom:12px"><h3>فعالیت‌های برنامه‌ریزی‌شده آینده</h3>
+<div class=sh style="margin:4px 0 6px"><b style="font-size:13px">برنامه‌ریزی‌شده (انجام‌نشده) — ${fa(paSplit.planned.length)}</b></div>${actTable(paSplit.planned,false)}
+<div class=sh style="margin:14px 0 6px"><b style="font-size:13px">انجام‌شده — ${fa(paSplit.done.length)}</b></div>${actTable(paSplit.done,true)}
+</div>
 <div class=c><div class=tw><table><tr>${J(['#','گروه محصول','محصول','تعداد سفارش','نوع سفارش','تاریخ نیاز','روز تا سررسید','اقلام MRP','اقلام EOQ','اقلام MinMax','اقلام تامین‌شده','تاریخ تخمینی تولید','وضعیت'].map(x=>`<th>${x}`))}${J(a.map(p=>`<tr style="cursor:pointer" onclick="openPlPop(${p.no})">${J([p.no,p.g,p.p,fa(p.q,0),p.ty,fd(p.nd),p.done?'—':(p.ov?fa(Math.abs(p.left),0)+' روز گذشته':fa(p.left,0)+' روز'),fa(p.mrp,0),fa(p.eoq,0),fa(p.mm,0),fa(p.sup,0),fd(p.ed),bd(...p.st)].map(x=>`<td>${x}`))}`))}</table></div><div class=gi>برای دیدن جزئیات کامل هر محصول (مراحل، تاریخ‌ها و روش‌های برنامه‌ریزی)، روی سطر آن بزنید.</div></div>
 <div class="c" style="margin-bottom:12px"><h3>نمودار زمانی برنامه‌ریزی تولید (نارنجی = فعالیت‌های ثبت‌شده، بنفش = تخمین تولید، قرمز = تاریخ نیاز، سبز = تولید واقعی)</h3>${gantt(a.map(p=>({l:p.no+' - '+p.p,b:[[p.rd,p.pd||p.nd,p.done?'#10b981':'#3b82f6',p.done?'از دریافت سفارش تا تولید واقعی':'از دریافت سفارش تا تاریخ نیاز']],m:[...(D.pa||[]).filter(x=>x.no==p.no).map(x=>[x.d,'#f59e0b',fd(x.d)+' | '+x.a+(x.h?' | '+fa(x.h,1)+' ساعت':'')]),[p.nd,'#ef4444','تاریخ نیاز '+fd(p.nd)],...(p.ed&&p.ed!=p.nd?[[p.ed,'#a855f7','تخمین تولید '+fd(p.ed)]]:[]),...(p.pd?[[p.pd,'#10b981','تولید واقعی '+fd(p.pd)]]:[])]})),Math.min(...a.map(p=>p.rd)),Math.max(...a.map(p=>p.nd),...a.filter(p=>p.pd).map(p=>p.pd),R)+10)}</div>
 <div class=c><h3>مقایسه تعداد اقلام محاسبه‌شده به تفکیک روش برنامه‌ریزی سفارش</h3><div style="height:${Math.max(260,a.length*40)}px"><canvas id=j></canvas></div></div>`;
@@ -228,7 +250,12 @@ function T4(){const a=D.od.map(o=>{const ac=D.oa.filter(x=>x.id==o.id),sp=sm(ac,
 if(pc>1)rs.push('عبور از سقف بودجه');if(stag>0)rs.push('رکود');if(ov)rs.push('گذشتن از تاریخ نیاز');
 const r=rs.length?['بالا','hi']:(pc>=.8||idle>=o.al*.7||dd(R,o.nd)<=14)?['متوسط','md']:['پایین','lo'];return{...o,ac,sp,la,idle,stag,pc,r,rs,last:ac.reduce((b,x)=>!b||x.d>=b.d?x:b,null)}});
 RAW.od_count=a.length;RAW.od_cap=sm(a,o=>o.cap);RAW.od_spent=sm(a,o=>o.sp);RAW.od_risk=a.filter(o=>o.r[1]=='hi').length;RAW.od_stag=a.filter(o=>o.stag>0).length;
+const oaAct=regActs(futureOrderActivities()),oaSplit=actSplit(oaAct);
 $('#v').innerHTML=`<p class=nt>ریسک: «بالا» اگر بودجه از سقف عبور کند، رکود از حد مجاز بگذرد یا تاریخ نیاز سپری شود؛ «متوسط» اگر مصرف بودجه ≥۸۰٪، نزدیک حد رکود یا کمتر از ۱۴ روز تا نیاز باشد.</p><div class=k>${K('تعداد سفارش کار',fa(a.length),'',null,a.length,'od_count')}${K('مجموع بودجه زمانی',fa(sm(a,o=>o.cap),0)+' ساعت','',null,sm(a,o=>o.cap),'od_cap')}${K('زمان مصرف‌شده',fa(sm(a,o=>o.sp),0)+' ساعت','',null,sm(a,o=>o.sp),'od_spent')}${K('سفارش پرریسک',fa(a.filter(o=>o.r[1]=='hi').length),'',a.length?a.filter(o=>o.r[1]=='hi').length/a.length*100:0,a.filter(o=>o.r[1]=='hi').length,'od_risk')}${K('سفارش دچار رکود',fa(a.filter(o=>o.stag>0).length),'',a.length?a.filter(o=>o.stag>0).length/a.length*100:0,a.filter(o=>o.stag>0).length,'od_stag')}</div>
+<div class=c style="margin-bottom:12px"><h3>فعالیت‌های برنامه‌ریزی‌شده آینده</h3>
+<div class=sh style="margin:4px 0 6px"><b style="font-size:13px">برنامه‌ریزی‌شده (انجام‌نشده) — ${fa(oaSplit.planned.length)}</b></div>${actTable(oaSplit.planned,false)}
+<div class=sh style="margin:14px 0 6px"><b style="font-size:13px">انجام‌شده — ${fa(oaSplit.done.length)}</b></div>${actTable(oaSplit.done,true)}
+</div>
 <div class=sh><b>آخرین فعالیت تخصیص‌داده‌شده هر سفارش</b><span>ORDER · Sheet2</span></div><div class=k style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))">${J(a.map(o=>`<div class=kc><b style="font-size:15px;margin:0 0 4px">${o.id} - ${o.t}</b><div style="border:1.5px solid var(--pr);background:rgba(37,99,235,.10);border-radius:8px;padding:8px 10px;margin:4px 0 8px;text-align:center;font-size:14px;font-weight:600;color:var(--tx)">${o.last?o.last.a:'فعالیتی ثبت نشده'}</div>${o.last?J([['تاریخ فعالیت',fd(o.last.d)],['زمان تخصیصی',fa(o.last.h,1)+' ساعت'],['روز از آخرین فعالیت',fa(dd(o.last.d,R),0)]].map(x=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid var(--bd)"><span>${x[0]}</span><b style="font-size:15px;margin:0">${x[1]}</b></div>`)):''}</div>`))}</div>
 <div class="r${(d=>d?' rh-'+d:'')(dirOf('od_'))}">${cd('بودجه زمانی: مصرف‌شده در برابر سقف (ساعت)','a',Math.max(260,a.length*44))}</div>
 <div class="c" style="margin-bottom:12px"><h3>نمودار زمانی هر سفارش کار (خط‌های نارنجی = فعالیت‌ها، خط قرمز باریک = تاریخ نیاز، خط عمودی قرمز = امروز)</h3>${gantt(a.map(o=>({l:o.id+' - '+o.t,b:[[o.s,o.la,'#3b82f6','شروع '+fd(o.s)+' تا آخرین فعالیت '+fd(o.la)],[o.la,o.nd,'#cbd5e1','تا تاریخ نیاز '+fd(o.nd)]],m:[...o.ac.map(x=>[x.d,'#f59e0b',fd(x.d)+' | '+x.a+' | '+x.h+' ساعت']),[o.nd,'#ef4444','تاریخ نیاز '+fd(o.nd)]]})),F.f||Math.min(...a.map(o=>o.s)),F.t||Math.max(...a.map(o=>o.nd),R)+10)}</div>

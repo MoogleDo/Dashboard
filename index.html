@@ -152,8 +152,8 @@ function hashKey(s){let h=0;for(let i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(
 function futureOrderActivities(){return D.oa.map(x=>{const o=D.od.find(y=>y.id==x.id);const k=hashKey('oa|'+x.id+'|'+x.d+'|'+x.a);return{k,kind:'oa',refId:x.id,refLabel:(o?o.id+' - '+o.t:String(x.id)),d:x.d,a:x.a,h:x.h}})}
 function futurePlanActivities(){return(D.pa||[]).map(x=>{const p=D.pl.find(y=>y.no==x.no);const k=hashKey('pa|'+x.no+'|'+x.d+'|'+x.a);return{k,kind:'pa',refId:x.no,refLabel:(p?p.no+' - '+p.p:String(x.no)),d:x.d,a:x.a,h:x.h}})}
 function regActs(items){items.forEach(x=>ACT_IDX[x.k]=x);return items}
-const actRow=(x,isDone)=>{const ov=!isDone&&x.d<=R,days=ov?dd(x.d,R):0,badge=isDone?bd('انجام شد','lo'):(ov?bd('به تعویق افتاده ('+fa(days,0)+' روز)','hi'):bd('برنامه‌ریزی‌شده','gy'));return `<tr><td><input type=checkbox ${isDone?'checked':''} onchange="toggleActivityDone('${x.k}',this.checked)"></td><td>${fd(x.d)}</td><td>${esc(x.refLabel)}</td><td style="white-space:normal;max-width:320px">${esc(x.a)}</td><td>${x.h?fa(x.h,1)+' ساعت':'—'}</td><td>${badge}</td></tr>`};
-const actTable=(items,isDone)=>items.length?`<div class=tw><table><tr><th></th><th>تاریخ</th><th>مربوط به</th><th>فعالیت</th><th>ساعت</th><th>وضعیت</th></tr>${J(items.map(x=>actRow(x,isDone)))}</table></div>`:'<p class=nt>موردی برای نمایش نیست.</p>';
+const actRow=(x,isDone,interactive=true)=>{const ov=!isDone&&x.d<=R,days=ov?dd(x.d,R):0,badge=isDone?bd('انجام شد','lo'):(ov?bd('به تعویق افتاده ('+fa(days,0)+' روز)','hi'):bd('برنامه‌ریزی‌شده','gy')),cb=interactive?`<td><input type=checkbox ${isDone?'checked':''} onchange="toggleActivityDone('${x.k}',this.checked)"></td>`:'';return `<tr>${cb}<td>${fd(x.d)}</td><td>${esc(x.refLabel)}</td><td style="white-space:normal;max-width:320px">${esc(x.a)}</td><td>${x.h?fa(x.h,1)+' ساعت':'—'}</td><td>${badge}</td></tr>`};
+const actTable=(items,isDone,interactive=true)=>items.length?`<div class=tw><table><tr>${interactive?'<th></th>':''}<th>تاریخ</th><th>مربوط به</th><th>فعالیت</th><th>ساعت</th><th>وضعیت</th></tr>${J(items.map(x=>actRow(x,isDone,interactive)))}</table></div>`:'<p class=nt>موردی برای نمایش نیست.</p>';
 const actSplit=items=>({planned:items.filter(x=>!DONE[x.k]).sort((p,q)=>p.d-q.d),done:items.filter(x=>DONE[x.k]).sort((p,q)=>(DONE[q.k].doneAt||0)-(DONE[p.k].doneAt||0))});
 async function toggleActivityDone(k,val){if(!DBX)return;const item=ACT_IDX[k];try{if(val){await DBX.collection('activity_done').doc(k).set({kind:item?item.kind:'',refId:item&&item.refId!=null?String(item.refId):'',refLabel:item?item.refLabel:'',d:item?item.d:null,a:item?item.a:'',h:item&&item.h!=null?item.h:null,doneAt:Date.now()})}else{await DBX.collection('activity_done').doc(k).delete()}}catch(e){}}
 // --- FIREBASE CONFIG ---
@@ -175,6 +175,21 @@ function initDb(){
     DBX=firebase.firestore();
     DBX.collection('notes').orderBy('created','desc').limit(200).onSnapshot(snap=>{NOTES=snap.docs.map(d=>({id:d.id,...d.data()}));if(T==0)render()},()=>{});
     DBX.collection('activity_done').onSnapshot(snap=>{DONE={};snap.docs.forEach(d=>DONE[d.id]=d.data());if(T==0||T==3||T==4)render()},()=>{});
+    runBackfillOnce();
+  }catch(e){}
+}
+async function runBackfillOnce(){
+  if(!DBX)return;
+  try{
+    const metaRef=DBX.collection('meta').doc('backfill_overdue_v1');
+    const metaSnap=await metaRef.get();
+    if(metaSnap.exists)return;
+    const Y=U(P(R)-1);
+    const items=[...futurePlanActivities(),...futureOrderActivities()].filter(x=>x.d<=Y).slice(0,450);
+    const batch=DBX.batch();
+    items.forEach(x=>{batch.set(DBX.collection('activity_done').doc(x.k),{kind:x.kind,refId:String(x.refId),refLabel:x.refLabel,d:x.d,a:x.a,h:x.h!=null?x.h:null,doneAt:Date.now(),backfill:true})});
+    batch.set(metaRef,{done:true,at:Date.now(),count:items.length});
+    await batch.commit();
   }catch(e){}
 }
 const noteFormHtml=(type,refId,refLabel)=>`<h3 style="font-size:13px;margin:14px 0 6px">افزودن یادداشت یا دستور مدیریتی</h3><div style="display:flex;flex-direction:column;gap:8px"><textarea id=nt-text rows=3 style="width:100%;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg2);color:var(--tx);font-family:inherit;resize:vertical;box-sizing:border-box" placeholder="متن یادداشت یا دستور..."></textarea><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select id=nt-pri style="padding:6px 8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg2);color:var(--tx)"><option value=normal>عادی</option><option value=urgent>فوری</option></select><input id=nt-author placeholder="نام شما (اختیاری)" style="flex:1;min-width:140px;padding:6px 8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg2);color:var(--tx);box-sizing:border-box"><button id=nt-submit onclick="submitNote(this)" data-type="${esc(type)}" data-refid="${refId!=null?esc(String(refId)):''}" data-reflabel="${esc(refLabel||'')}" style="padding:6px 16px;border-radius:8px;border:none;background:var(--pr);color:#fff;cursor:pointer;font-family:inherit">ثبت یادداشت</button></div><div id=nt-msg style="font-size:12px;color:var(--mu);min-height:16px"></div></div>`;
@@ -220,8 +235,8 @@ $('#v').innerHTML=`<div class=sh><b>خلاصه اقدامات اجرایی</b><s
 <div class=c style="margin-bottom:12px"><h3>خلاصه وضعیت محصولات</h3>${pl.length?`<div class=k style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">${J(pl.map(plCard))}</div>`:'<p class=nt>داده‌ای در برنامه‌ریزی تولید ثبت نشده است.</p>'}</div>
 <div class=c style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px"><h3 style="margin:0">فعالیت‌های برنامه‌ریزی‌شده محصولات (آینده)</h3><span style="font-size:11px;color:var(--mu)">برنامه‌ریزی تولید — تاریخ بعد از امروز</span></div>
 <div class=k>${K('کل فعالیت‌های آینده',fa(actAll.length))}${K('باقی‌مانده',fa(actPlannedN))}${K('انجام‌شده',fa(actDoneN))}${K('نزدیک (تا ۷ روز آینده)',fa(actNearN),'',actPlannedN?actNearN/actPlannedN*100:0)}</div>
-<div class=sh style="margin:10px 0 6px"><b style="font-size:13px">برنامه‌ریزی‌شده (انجام‌نشده)</b></div>${actTable(actSplitRes.planned,false)}
-<div class=sh style="margin:14px 0 6px"><b style="font-size:13px">انجام‌شده</b></div>${actTable(actSplitRes.done,true)}
+<div class=sh style="margin:10px 0 6px"><b style="font-size:13px">برنامه‌ریزی‌شده (انجام‌نشده)</b></div>${actTable(actSplitRes.planned,false,false)}
+<div class=sh style="margin:14px 0 6px"><b style="font-size:13px">انجام‌شده</b></div>${actTable(actSplitRes.done,true,false)}
 </div>
 <div class=c><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px"><h3 style="margin:0">یادداشت‌های مدیریت</h3><button onclick="openGeneralNotePop()" style="font-size:12px;padding:5px 12px;border-radius:8px;border:none;background:var(--pr);color:#fff;cursor:pointer;font-family:inherit">+ یادداشت جدید</button></div>${NOTES.length?`<div class=tw><table><tr><th>اولویت</th><th>مورد مرتبط</th><th>متن</th><th>ثبت‌کننده</th><th>زمان</th><th></th></tr>${J(NOTES.map(noteRow))}</table></div>`:'<p class=nt>هنوز یادداشتی ثبت نشده است. روی هر سفارش کار یا محصول، یا با دکمه بالا، می‌توانید یادداشت یا دستور جدید ثبت کنید.</p>'}</div>`}
 

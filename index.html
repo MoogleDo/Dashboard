@@ -159,10 +159,10 @@ function openNewPop(){const items=newRecords();openListPop('موارد جدید 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const rowAlertCell=r=>r.id!=null?`<span class="lk" onclick="openOdPop(${r.id})">${r.alert}</span>`:r.alert;
 /* ---- فعالیت‌های برنامه‌ریزی‌شده (وضعیت انجام از اکسل) ---- */
-function futureOrderActivities(){return D.oa.map(x=>{const o=D.od.find(y=>y.id==x.id);return{refLabel:(o?o.id+' - '+o.t:String(x.id)),d:x.d,a:x.a,h:x.h,done:!!x.done,cr:x.cr}})}
-function futurePlanActivities(){return(D.pa||[]).map(x=>{const p=D.pl.find(y=>y.no==x.no);return{refLabel:(p?p.no+' - '+p.p:String(x.no)),d:x.d,a:x.a,h:x.h,done:!!x.done,cr:x.cr}})}
-const actRow=x=>{const ov=!x.done&&x.d<=R,days=ov?dd(x.d,R):0,badge=x.done?bd('انجام شد','lo'):(ov?bd('به تعویق افتاده ('+fa(days,0)+' روز)','hi'):bd('برنامه‌ریزی‌شده','gy'));return `<tr${isNew(x.cr)?' class="nw-row"':''}><td>${fd(x.d)}</td><td>${esc(x.refLabel)}</td><td style="white-space:normal;max-width:320px">${esc(x.a)}</td><td>${x.h?fa(x.h,1)+' ساعت':'—'}</td><td>${badge}${nb(x.cr)}</td></tr>`};
-const actTable=items=>items.length?`<div class=tw><table><tr><th>تاریخ</th><th>مربوط به</th><th>فعالیت</th><th>ساعت</th><th>وضعیت</th></tr>${J(items.map(actRow))}</table></div>`:'<p class=nt>موردی برای نمایش نیست.</p>';
+function futureOrderActivities(){return D.oa.map(x=>{const o=D.od.find(y=>y.id==x.id);return{refLabel:(o?o.id+' - '+o.t:String(x.id)),d:x.d,a:x.a,h:x.h,done:!!x.done,cr:x.cr,est:x.est,note:x.note}})}
+function futurePlanActivities(){return(D.pa||[]).map(x=>{const p=D.pl.find(y=>y.no==x.no);return{refLabel:(p?p.no+' - '+p.p:String(x.no)),d:x.d,a:x.a,h:x.h,done:!!x.done,cr:x.cr,est:x.est,note:x.note}})}
+const actRow=x=>{const ov=!x.done&&x.d<=R,days=ov?dd(x.d,R):0,badge=x.done?bd('انجام شد','lo'):(ov?bd('به تعویق افتاده ('+fa(days,0)+' روز)','hi'):bd('برنامه‌ریزی‌شده','gy'));return `<tr${isNew(x.cr)?' class="nw-row"':''}><td>${fd(x.d)}</td><td>${esc(x.refLabel)}</td><td style="white-space:normal;max-width:320px">${esc(x.a)}</td><td>${x.h?fa(x.h,1)+' ساعت':'—'}</td><td>${badge}${nb(x.cr)}</td><td>${!x.done&&x.est?fd(x.est):'—'}</td><td>${x.note?esc(x.note):'—'}</td></tr>`};
+const actTable=items=>items.length?`<div class=tw><table><tr><th>تاریخ</th><th>مربوط به</th><th>فعالیت</th><th>ساعت</th><th>وضعیت</th><th>اتمام برآوردی</th><th>یادداشت</th></tr>${J(items.map(actRow))}</table></div>`:'<p class=nt>موردی برای نمایش نیست.</p>';
 const actSplit=items=>({planned:items.filter(x=>!x.done).sort((p,q)=>p.d-q.d),done:items.filter(x=>x.done).sort((p,q)=>q.d-p.d)});
 // --- FIREBASE CONFIG ---
 // راهنمای ساخت این مقادیر در README مخزن گیت‌هاب توضیح داده شده.

@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>داشبورد عملیات</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#f59e0b">
+<meta name="theme-color" content="#b64b1d">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -13,21 +13,32 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <style>
-:root{--bg:#f4f6fa;--bg2:#e8ecf3;--cd:#fff;--tx:#1e293b;--mu:#64748b;--bd:#dbe1ea;--pr:#2563eb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f172a;--bg2:#1e293b;--cd:#182236;--tx:#e2e8f0;--mu:#94a3b8;--bd:#2b3a52}}
-:root[data-theme="dark"]{--bg:#0f172a;--bg2:#1e293b;--cd:#182236;--tx:#e2e8f0;--mu:#94a3b8;--bd:#2b3a52}
+:root{--bg:#edf1f4;--bg2:#e3e9ee;--cd:#fff;--tx:#16222c;--mu:#5c6b78;--bd:#d7dfe6;--pr:#b64b1d;--pr-wash:#f4e4d9;--crit:#c23b3b;--crit-wash:#fbe7e7;--warn:#a9711a;--warn-wash:#f6ecd8;--good:#2f7d5b;--good-wash:#e3f1ea;--new:#6e4fc6;--new-wash:#ece6f9;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1620;--bg2:#1b2530;--cd:#18222d;--tx:#e7edf2;--mu:#9fb0bd;--bd:#2b3947;--pr:#e08a4f;--pr-wash:#3a2616;--crit:#e57373;--crit-wash:#38201f;--warn:#d9a53f;--warn-wash:#3a2f17;--good:#5bbf93;--good-wash:#193a2c;--new:#a98cf0;--new-wash:#2a2140}}
+:root[data-theme="dark"]{--bg:#0f1620;--bg2:#1b2530;--cd:#18222d;--tx:#e7edf2;--mu:#9fb0bd;--bd:#2b3947;--pr:#e08a4f;--pr-wash:#3a2616;--crit:#e57373;--crit-wash:#38201f;--warn:#d9a53f;--warn-wash:#3a2f17;--good:#5bbf93;--good-wash:#193a2c;--new:#a98cf0;--new-wash:#2a2140}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;background:var(--bg);color:var(--tx);font:14px Vazirmatn,Tahoma,sans-serif}
 header{padding:14px 18px 0}h1{margin:0;font-size:20px}h1 small{color:var(--mu);font-size:12px;font-weight:400}
 .fb{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:10px 18px;background:var(--cd);border-block:1px solid var(--bd);margin-top:10px}
 .fb label{font-size:12px;color:var(--mu)}select,button{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:3px 6px}
-button{cursor:pointer}button.on{background:var(--pr);color:#fff;border-color:var(--pr)}.tabs{display:flex;gap:4px;padding:10px 18px 0;overflow-x:auto}
-.tabs button{padding:8px 16px;border-radius:8px 8px 0 0;border-bottom:0;white-space:nowrap}
+button{cursor:pointer}button.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+.shell{display:flex;min-height:100vh}.content{flex:1;min-width:0}
+.rail{width:84px;flex:none;background:var(--cd);border-inline-start:1px solid var(--bd);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:3px;position:sticky;top:0;align-self:flex-start;height:100vh;overflow-y:auto}
+.rail .mark{width:36px;height:36px;border-radius:10px;background:var(--pr);color:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:14px;flex:none}
+.rail .mark svg{width:20px;height:20px}
+#tb{display:contents}
+.rail button{all:unset;display:flex;flex-direction:column;align-items:center;gap:4px;width:66px;padding:9px 0;border-radius:11px;cursor:pointer;color:var(--mu);font:inherit}
+.rail button svg{width:19px;height:19px}
+.rail button span{font-size:10.5px;font-weight:500;white-space:normal;text-align:center;line-height:1.25}
+.rail button.on{background:var(--pr-wash);color:var(--pr)}
+.rail button:hover:not(.on){background:var(--bg2)}
+.rail .sp{flex:1}
+@media (max-width:760px){.shell{flex-direction:column}.rail{width:100%;height:auto;position:fixed;bottom:0;top:auto;flex-direction:row;justify-content:space-around;padding:6px 2px;border-inline-start:none;border-top:1px solid var(--bd);z-index:40;align-self:stretch}.rail .mark,.rail .sp{display:none}.rail button{width:auto;padding:6px 8px}.content{padding-bottom:62px}}
 main{padding:14px 18px 30px}.k{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
 .kc,.c{background:var(--cd);border:1px solid var(--bd);border-radius:10px;padding:10px 12px}.kc b{display:block;font-size:22px;margin:2px 0}.kc span,.kc i{font-size:12px;color:var(--mu);font-style:normal}.dl{font-size:12px;font-weight:700;margin-right:6px;vertical-align:middle}.dlu{color:#16a34a}.dld{color:#ef4444}.rh-up,.rh-down{border-radius:10px;padding:10px}.rh-up{background:rgba(16,185,129,.14)}.rh-down{background:rgba(239,68,68,.14)}
 .r{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:12px;margin-bottom:12px}.c h3{margin:0 0 8px;font-size:14px}.c.w{grid-column:1/-1}
 .tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:12px}th,td{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:right;white-space:nowrap}th{color:var(--mu)}
-.bg{padding:1px 8px;border-radius:10px;color:#fff;font-size:11px}.hi{background:#ef4444}.md{background:#f59e0b}.lo{background:#10b981}.gy{background:#94a3b8}.nw{background:#7c3aed}
-tr.nw-row td{background:rgba(124,58,237,.14)}.kc.nw-row{background:rgba(124,58,237,.14);border-color:rgba(124,58,237,.5)}
+.bg{padding:1px 8px;border-radius:10px;color:#fff;font-size:11px}.hi{background:var(--crit)}.md{background:var(--warn)}.lo{background:var(--good)}.gy{background:#8796a3}.nw{background:var(--new)}
+tr.nw-row td{background:rgba(110,79,198,.14)}.kc.nw-row{background:rgba(110,79,198,.14);border-color:rgba(110,79,198,.5)}
 .g{padding-top:22px;position:relative}.gr{display:flex;align-items:center;margin:5px 0}.gl{width:170px;flex:none;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gt{position:relative;flex:1;height:30px;background:var(--bg2);border-radius:6px;background-image:linear-gradient(to left,var(--bd) 1px,transparent 1px);background-size:25% 100%}.gt .b{position:absolute;top:7px;height:16px;border-radius:4px;cursor:pointer}.gt .m{position:absolute;top:8px;width:13px;height:13px;transform:rotate(45deg);margin-right:-6px;border:2px solid var(--cd);box-sizing:border-box;cursor:pointer}.gt .m::after{content:'';position:absolute;inset:-9px}
 .gt .rf,.ax .rf{position:absolute;top:0;bottom:0;width:2px;background:#ef4444}.ax{position:absolute;top:0;right:170px;left:0;height:18px;font-size:11px;color:var(--mu)}.ax span{position:absolute;transform:translateX(50%);white-space:nowrap}
@@ -39,6 +50,36 @@ tr.nw-row td{background:rgba(124,58,237,.14)}.kc.nw-row{background:rgba(124,58,2
 .st{display:inline-block;width:11px;height:11px;border-radius:2px;margin-left:2px}.pb{background:var(--bg2);border-radius:4px;width:110px;height:10px;display:inline-block}.pb i{display:block;height:100%;background:var(--pr);border-radius:4px}.pg i{background:repeating-linear-gradient(to left,transparent 0 9%,var(--cd) 9% 10%) right/110px 100% no-repeat,linear-gradient(to left,#991b1b 0% 10%,#b91c1c 10% 20%,#c62828 20% 30%,#dc2626 30% 40%,#ef4444 40% 50%,#65a30d 50% 60%,#4d9f2f 60% 70%,#22a34f 70% 80%,#16a34a 80% 90%,#15803d 90% 100%) right/110px 100% no-repeat}
 .sh{display:flex;align-items:center;gap:8px;margin:14px 0 8px;font-size:14px}.cb-hi{border-inline-start:4px solid #ef4444}.cb-md{border-inline-start:4px solid #f59e0b}.cb-warn{border-inline-start:4px solid #eab308}.cb-ok{border-inline-start:4px solid #10b981}.hb{background:var(--bg2);border-radius:8px;height:26px;overflow:hidden;position:relative}.hb i{display:block;height:100%;border-radius:8px;transition:width .6s}.hb span{position:absolute;inset:0;display:flex;align-items:center;padding:0 10px;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.35)}.sh b{border-inline-start:4px solid var(--pr);padding-inline-start:8px}.sh span{color:var(--mu);font-size:11px}
 .nt{color:var(--mu);font-size:12px;margin:0 0 10px}
+.att-head{display:flex;align-items:baseline;gap:10px;margin:2px 0 14px;flex-wrap:wrap}.att-head .att-n{font-size:34px;font-weight:800;line-height:1;color:var(--crit)}.att-head .att-n.zero{color:var(--good)}.att-head span{font-size:13px;color:var(--mu)}
+.fcard{background:var(--cd);border:1px solid var(--bd);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.fhead{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.fdot{width:9px;height:9px;border-radius:50%;flex:none}
+.fcard.sev-hi .fdot{background:var(--crit)}.fcard.sev-md .fdot{background:var(--warn)}
+.fhead b{flex:1;font-size:13.5px;font-weight:600}
+.fcount{background:var(--bg2);color:var(--tx);font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px}
+.fchev{color:var(--mu);transition:transform .2s;font-size:14px}
+.fcard.open .fchev{transform:rotate(90deg)}
+.fbody{display:none;border-top:1px solid var(--bd)}
+.fcard.open .fbody{display:block}
+.frow{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;border-bottom:1px solid var(--bd);font-size:12.5px}
+.frow:last-child{border-bottom:0}
+.frow:hover{background:var(--bg2)}
+.frow .fnm{font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frow .fsub{color:var(--mu);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frow .ftag{color:var(--mu);font-size:11.5px;flex:none;white-space:nowrap}
+#splash{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:radial-gradient(900px 600px at 50% 40%,#241a12 0%,#140f0b 62%,#0d0a07 100%);transition:opacity .55s ease,visibility .55s ease}
+#splash.hide{opacity:0;visibility:hidden;pointer-events:none}
+#splash .rig{display:flex;flex-direction:column;align-items:center;gap:22px}
+#splash svg{width:112px;height:112px;overflow:visible}
+#splash .ray{stroke:var(--pr);stroke-width:3.5;stroke-linecap:round;opacity:0;stroke-dasharray:26;stroke-dashoffset:26;transform-origin:64px 64px;animation:ray-grow .5s cubic-bezier(.22,1,.36,1) forwards}
+#splash .core{opacity:0;transform:scale(.4);transform-origin:64px 64px;animation:core-pop .6s cubic-bezier(.22,1,.36,1) forwards .35s}
+#splash .wordmark{display:flex;flex-direction:column;align-items:center;gap:6px;opacity:0;transform:translateY(10px);animation:word-in .6s cubic-bezier(.22,1,.36,1) forwards 1.05s}
+#splash .wordmark b{font-size:24px;font-weight:800;letter-spacing:.5px;color:#f6efe8;font-family:Vazirmatn,Tahoma,sans-serif}
+#splash .wordmark span{font-size:12px;color:#cbb79e;font-family:Vazirmatn,Tahoma,sans-serif}
+@keyframes ray-grow{to{opacity:1;stroke-dashoffset:0}}
+@keyframes core-pop{to{opacity:1;transform:scale(1)}}
+@keyframes word-in{to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){#splash .ray,#splash .core,#splash .wordmark{animation:none;opacity:1;stroke-dashoffset:0;transform:none}}
 </style></head><body>
 <div id="lockscreen" style="position:fixed;inset:0;background:var(--bg);z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;font-family:Vazirmatn,Tahoma,sans-serif">
 <div style="font-size:16px;color:var(--tx);font-weight:800">داشبورد عملیات</div>
@@ -50,10 +91,16 @@ tr.nw-row td{background:rgba(124,58,237,.14)}.kc.nw-row{background:rgba(124,58,2
 <div id="lock-err" style="font-size:12px;color:#ef4444;min-height:16px"></div>
 </div>
 <div id="app-content" style="display:none">
+<div id="splash" aria-hidden="true"><div class="rig"><svg viewBox="0 0 128 128" fill="none"><g class="core"><circle cx="64" cy="64" r="20" fill="var(--pr)"/><circle cx="64" cy="64" r="20" fill="none" stroke="#f6efe8" stroke-width="1" opacity=".35"/></g><g><line class="ray" x1="64" y1="18" x2="64" y2="30" style="animation-delay:.05s"/><line class="ray" x1="99" y1="29" x2="90.5" y2="37.5" style="animation-delay:.1s"/><line class="ray" x1="110" y1="64" x2="98" y2="64" style="animation-delay:.15s"/><line class="ray" x1="99" y1="99" x2="90.5" y2="90.5" style="animation-delay:.2s"/><line class="ray" x1="64" y1="110" x2="64" y2="98" style="animation-delay:.25s"/><line class="ray" x1="29" y1="99" x2="37.5" y2="90.5" style="animation-delay:.1s"/><line class="ray" x1="18" y1="64" x2="30" y2="64" style="animation-delay:.15s"/><line class="ray" x1="29" y1="29" x2="37.5" y2="37.5" style="animation-delay:.2s"/></g></svg><div class="wordmark"><b>نیاک انرژی</b><span>داشبورد عملیات</span></div></div></div>
+<div class="shell">
+<nav class="rail"><div class="mark"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2" fill="currentColor" stroke="none"/><path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1M18.4 18.4l-2.1-2.1M7.7 7.7L5.6 5.6"/></svg></div><div id="tb"></div><div class="sp"></div></nav>
+<div class="content">
 <header><h1>داشبورد عملیات <small id="rf"></small></h1></header>
 <div class="fb"><label>تجمیع</label><select id="gg"><option value="d">روزانه<option value="w">هفتگی<option value="m">ماهانه<option value="y">سالانه</select>
 <label>انبار</label><select id="wh"><option value="">همه</select><button id="ca">پاک کردن همه فیلترها</button></div>
-<div class="tabs" id="tb"></div><main id="v"></main>
+<main id="v"></main>
+</div>
+</div>
 <div id="gm" hidden><div class="gmb" role="dialog" aria-modal="true"><div class="gmh"><b id="gmt"></b><button id="gmx" aria-label="بستن">✕</button></div><div class="gmc" id="gmc"></div></div></div>
 </div>
 <script>
@@ -64,9 +111,20 @@ tr.nw-row td{background:rgba(124,58,237,.14)}.kc.nw-row{background:rgba(124,58,2
     const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));
     return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
   }
+  function bootSplash(){
+    const el=document.getElementById('splash');
+    if(!el)return;
+    const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let already=false;
+    try{already=sessionStorage.getItem('niak_booted')==='1'}catch(e){}
+    if(reduce||already){el.classList.add('hide');setTimeout(()=>el.remove(),600);return}
+    setTimeout(()=>{el.classList.add('hide');setTimeout(()=>el.remove(),600)},1900);
+    try{sessionStorage.setItem('niak_booted','1')}catch(e){}
+  }
   function unlock(){
     document.getElementById('lockscreen').style.display='none';
     document.getElementById('app-content').style.display='';
+    bootSplash();
   }
   try{if(localStorage.getItem(LS_KEY)==PW_HASH){unlock()}}catch(e){}
   document.getElementById('lock-form').addEventListener('submit',async function(e){
@@ -161,7 +219,7 @@ const rowAlertCell=r=>r.id!=null?`<span class="lk" onclick="openOdPop(${r.id})">
 /* ---- فعالیت‌های برنامه‌ریزی‌شده (وضعیت انجام از اکسل) ---- */
 function futureOrderActivities(){return D.oa.map(x=>{const o=D.od.find(y=>y.id==x.id);return{refLabel:(o?o.id+' - '+o.t:String(x.id)),d:x.d,a:x.a,h:x.h,done:!!x.done,cr:x.cr,est:x.est,note:x.note}})}
 function futurePlanActivities(){return(D.pa||[]).map(x=>{const p=D.pl.find(y=>y.no==x.no);return{refLabel:(p?p.no+' - '+p.p:String(x.no)),d:x.d,a:x.a,h:x.h,done:!!x.done,cr:x.cr,est:x.est,note:x.note}})}
-const actRow=x=>{const ov=!x.done&&x.d<=R,days=ov?dd(x.d,R):0,badge=x.done?bd('انجام شد','lo'):(ov?bd('به تعویق افتاده ('+fa(days,0)+' روز)','hi'):bd('برنامه‌ریزی‌شده','gy'));return `<tr${isNew(x.cr)?' class="nw-row"':''}><td>${fd(x.d)}</td><td>${esc(x.refLabel)}</td><td style="white-space:normal;max-width:320px">${esc(x.a)}</td><td>${x.h?fa(x.h,1)+' ساعت':'—'}</td><td>${badge}${nb(x.cr)}</td><td>${!x.done&&x.est?fd(x.est):'—'}</td><td>${x.note?esc(x.note):'—'}</td></tr>`};
+const actRow=x=>{const ov=!x.done&&x.d<=R,days=ov?dd(x.d,R):0,badge=x.done?bd('انجام شد','lo'):(ov?bd('به تعویق افتاده ('+fa(days,0)+' روز)',days<=7?'md':'hi'):bd('برنامه‌ریزی‌شده','gy'));return `<tr${isNew(x.cr)?' class="nw-row"':''}><td>${fd(x.d)}</td><td>${esc(x.refLabel)}</td><td style="white-space:normal;max-width:320px">${esc(x.a)}</td><td>${x.h?fa(x.h,1)+' ساعت':'—'}</td><td>${badge}${nb(x.cr)}</td><td>${!x.done&&x.est?fd(x.est):'—'}</td><td>${x.note?esc(x.note):'—'}</td></tr>`};
 const actTable=items=>items.length?`<div class=tw><table><tr><th>تاریخ</th><th>مربوط به</th><th>فعالیت</th><th>ساعت</th><th>وضعیت</th><th>اتمام برآوردی</th><th>یادداشت</th></tr>${J(items.map(actRow))}</table></div>`:'<p class=nt>موردی برای نمایش نیست.</p>';
 const actSplit=items=>({planned:items.filter(x=>!x.done).sort((p,q)=>p.d-q.d),done:items.filter(x=>x.done).sort((p,q)=>q.d-p.d)});
 // --- FIREBASE CONFIG ---
@@ -214,19 +272,28 @@ const actAll=futurePlanActivities();
 const actSplitRes=actSplit(actAll),actPlannedN=actSplitRes.planned.length,actNearN=actSplitRes.planned.filter(x=>dd(R,x.d)<=7).length;
 const cc=(l,v,u,cls,fn)=>`<div class="kc cb-${cls}"${fn?` style="cursor:pointer" onclick="${fn}"`:''}><span>${l}</span><b>${fa(v)} <i style="font-style:normal;font-size:13px;color:var(--mu)">${u}</i></b></div>`;
 const pl=D.pl.map(p=>{const done=p.pd!=null,left=dd(R,p.nd),ov=!done&&R>p.nd,st=done?['تولید شده','lo']:(ov?['عقب‌افتاده','hi']:['در برنامه','gy']);return{...p,done,left,ov,st}});
+const ovN=pl.filter(p=>p.ov).length;
 const plCard=p=>`<div class="kc${isNew(p.cr)?' nw-row':''}" style="cursor:pointer" onclick="openPlPop(${p.no})"><b style="font-size:14px;margin:0 0 4px;display:block">${p.p}</b><div style="font-size:12px;color:var(--mu);margin-bottom:6px">${p.g} — ${fa(p.q,0)} عدد سفارش</div>${bd(...p.st)}${nb(p.cr)} <span style="font-size:12px;color:var(--mu);margin-right:4px">${p.done?'تولید شده: '+fa(p.pq,0)+' عدد':(p.ov?fa(Math.abs(p.left),0)+' روز از تاریخ نیاز گذشته':fa(p.left,0)+' روز تا تاریخ نیاز')}</span></div>`;
 const io=D.io,bm=io.filter(r=>r.k&&r.k!='سیستمی'&&r.st!='N'),bo=bm.filter(r=>r.st=='O'),gp=io.filter(r=>r.rg&&r.k!='سیستمی').map(r=>({g:dd(r.d,r.rg)})),lw=io.filter(r=>r.k&&r.k!='سیستمی'&&dd(r.d,R)>=0&&dd(r.d,R)<=7).length;
 const hfManual=io.filter(r=>r.k=='خروج دستی'&&r.s=='حواله فروش'),hfSys=(D.sys||[]).filter(r=>r.t=='حواله فروش'),hfPct=hfSys.length?hfManual.length/hfSys.length*100:0;
 const noteRow=n=>{const dt=new Date(n.created),when=dt.toLocaleDateString('fa-IR')+' '+dt.toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'}),item=n.refLabel||(n.type=='general'?'یادداشت عمومی':'—');
 return `<tr style="${n.resolved?'opacity:.5':''}"><td>${bd(n.priority=='urgent'?'فوری':'عادی',n.priority=='urgent'?'hi':'gy')}</td><td>${item}</td><td style="white-space:normal;max-width:320px">${n.text}</td><td>${n.author||'—'}</td><td>${when}</td><td><button onclick="toggleNoteResolved('${n.id}',${!n.resolved})" style="font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid var(--bd);background:var(--bg2);color:var(--tx);cursor:pointer">${n.resolved?'بازگردانی':'بررسی شد'}</button></td></tr>`};
 const newAll=newRecords();
-$('#v').innerHTML=`<div class=sh><b>خلاصه اقدامات اجرایی</b><span>خلاصه اجرایی — سفارشات کار</span></div>
-<div class=k>${cc('نیازمند تصمیم فوری',critN,'مورد','hi',"openSevPop('hi')")}${cc('نزدیک به ریسک',warnN,'مورد','md',"openSevPop('md')")}${cc('در جریان (بدون نیاز به مداخله)',okN,'مورد','ok',"openSevPop('ok')")}</div>
+const frow=(nm,sub,tag,fn,cr)=>`<div class="frow" onclick="${fn}"><div class="fnm">${esc(nm)}</div><div class="fsub">${esc(sub||'')}</div>${isNew(cr)?bd('جدید','nw')+' ':''}${tag?`<span class="ftag">${esc(tag)}</span>`:''}</div>`;
+const fcard=(sev,title,n,bodyHtml)=>n>0?`<div class="fcard sev-${sev}${sev=='hi'?' open':''}"><div class="fhead" onclick="this.parentElement.classList.toggle('open')"><span class="fdot"></span><b>${title}</b><span class="fcount">${fa(n,0)}</span><span class="fchev">›</span></div><div class="fbody">${bodyHtml}</div></div>`:'';
+const feedHtml=J([
+fcard('hi','سفارشات کار پرریسک',critN,J(rows.filter(r=>r.sev=='hi').map(r=>frow(r.alert,r.impact,r.delay,r.id!=null?`openOdPop(${r.id})`:'',r.cr)))),
+fcard('hi','محصولات عقب‌افتاده از تاریخ نیاز',ovN,J(pl.filter(p=>p.ov).map(p=>frow(p.p,p.g,fa(Math.abs(p.left),0)+' روز گذشته',`openPlPop(${p.no})`,p.cr)))),
+fcard('md','نزدیک به ریسک',warnN,J(rows.filter(r=>r.sev=='md').map(r=>frow(r.alert,r.impact,r.delay,r.id!=null?`openOdPop(${r.id})`:'',r.cr)))),
+fcard('md','اسناد انبار بدون ثبت سیستمی',bo.length,frow('برگه دستی بدون سند سیستمی','نیاز به تطبیق با سند سیستمی و پیگیری',fa(bo.length,0)+' سند','openBoPop()'))
+].filter(Boolean));
+$('#v').innerHTML=`<div class=att-head><b class="att-n${(critN+ovN)==0?' zero':''}">${fa(critN+ovN,0)}</b><span>مورد نیازمند تصمیم همین حالا</span></div>
+${feedHtml||'<p class=nt>در حال حاضر هشدار عملیاتی ثبت‌شده‌ای وجود ندارد.</p>'}
+<p class=nt style="margin:4px 0 14px">برای دیدن جزئیات و فعالیت‌های برنامه‌ریزی‌شدهٔ هر مورد، روی آن کلیک کنید.</p>
 <div class=sh><b>تغییرات نسبت به هفته گذشته</b><span>از جمعه ${fd(LF)} تا کنون</span></div>
 <div class=k>${K('موارد جدید یا ویرایش‌شده',fa(newAll.length),'بازمی‌گردد از جمعه هر هفته',null,null,null,'openNewPop()')}</div>
 <div class=sh><b>وضعیت انبار</b><span>خلاصه — INOUT</span></div>
 <div class=k>${K('برگه دستی بدون سند سیستمی (سند باز)',fa(bo.length),'',null,null,null,'openBoPop()')}${K('میانگین فاصله تا ثبت سیستمی',gp.length?fa(avg(gp,x=>x.g))+' روز':'—','',null,null,null,'openGpPop()')}${K('اسناد دستی صادر شده در هفته گذشته',fa(lw),'',null,null,null,'openLwPop()')}${K('درصد حواله فروش با خروج دستی',fa(hfPct,1)+'٪',fa(hfManual.length)+' از '+fa(hfSys.length)+' حواله فروش (SYSTEM)',null,null,null,'openHfManualPop()')}</div>
-<div class=c style="margin-bottom:12px"><h3>هشدارهای عملیاتی</h3>${rows.length?tbl(['هشدار','واحد','وضعیت','مدت','اثر عملیاتی','اقدام پیشنهادی'],rows.map(r=>({cr:r.cr,cells:[rowAlertCell(r),r.unit,bd(r.sev=='hi'?'بحرانی':'هشدار',r.sev)+nb(r.cr),r.delay,r.impact,r.action]}))):'<p class=nt>در حال حاضر هشدار عملیاتی ثبت‌شده‌ای وجود ندارد.</p>'}<p class=nt style="margin:8px 0 0">برای دیدن فعالیت‌های برنامه‌ریزی‌شده (آینده) و رویدادهای گذشتهٔ هر مورد، روی عنوان آن کلیک کنید؛ برای محصولات، روی کارت آن در «خلاصه وضعیت محصولات» کلیک کنید.</p></div>
 <div class=c style="margin-bottom:12px"><h3>خلاصه وضعیت محصولات</h3>${pl.length?`<div class=k style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">${J(pl.map(plCard))}</div>`:'<p class=nt>داده‌ای در برنامه‌ریزی تولید ثبت نشده است.</p>'}</div>
 <div class=c style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px"><h3 style="margin:0">فعالیت‌های برنامه‌ریزی‌شده محصولات (آینده)</h3><span style="font-size:11px;color:var(--mu)">برنامه‌ریزی تولید — تاریخ بعد از امروز</span></div>
 <div class=k>${K('فعالیت‌های انجام‌نشده',fa(actPlannedN))}${K('نزدیک (تا ۷ روز آینده)',fa(actNearN),'',actPlannedN?actNearN/actPlannedN*100:0)}</div>
@@ -238,7 +305,7 @@ ${actTable(actSplitRes.planned)}
 function T1(){const io=D.io.filter(r=>inr(r.d)&&okw(r)),sy=D.sys.filter(r=>inr(r.d)&&okw(r)),ac=D.acc.filter(r=>inr(r.d)&&okw(r)),g=GN[F.g];
 const mi=io.filter(r=>r.k=='ورود دستی').length,mo=io.filter(r=>r.k=='خروج دستی'),mr=mo.filter(r=>r.st!='N'),ns=mr.filter(r=>r.st=='O'),bm=io.filter(r=>r.k!='سیستمی'&&r.st!='N'),bo=bm.filter(r=>r.st=='O'),dz=new Set(bm.map(r=>r.d)).size,gp=io.filter(r=>r.rg&&r.k!='سیستمی').map(r=>({s:r.sr,g:dd(r.d,r.rg)})),gm=gp.length?gp.reduce((a,x)=>x.g>a.g?x:a):null,ld=io.filter(r=>r.t=='خروج'),ul=io.filter(r=>r.t=='ورود'),dis=ac.filter(r=>r.s!=r.k);
 RAW.io_total=io.length;RAW.io_manual_in=mi;RAW.io_manual_out=mo.length;RAW.io_open=bo.length;RAW.sys_total=sy.length;RAW.sys_out=sy.filter(r=>r.t.startsWith('حواله')).length;RAW.sys_types=new Set(sy.map(r=>r.t)).size;
-$('#v').innerHTML=`<div class=sh><b>اسناد ورود و خروج انبار</b><span>INOUT</span></div><div class=k>${K('تعداد کل برگه‌های ورود و خروج',fa(io.length),'',null,io.length,'io_total')}${K('اسناد ورود دستی',fa(mi),'',null,mi,'io_manual_in')}${K('اسناد خروج دستی',fa(mo.length),'',null,mo.length,'io_manual_out')}${K('جدید/ویرایش‌شده از جمعه گذشته',fa(io.filter(r=>isNew(r.cr)).length),'از '+fd(LF)+' تا کنون',null,null,null,'openNewPop()')}${GA('میانگین زمان بارگیری (خروج)',avg(ld,r=>r.ld),'خروج')}${GA('میانگین زمان تخلیه (ورود)',avg(ul,r=>r.ld),'ورود')}${K('برگه دستی بدون سند سیستمی (سند باز)',fa(bo.length),'',bm.length?bo.length/bm.length*100:0,bo.length,'io_open')}${K('میانگین سند باز روزانه',fa(dz?bo.length/dz:0,1),fa(bo.length)+' سند باز ÷ '+fa(dz)+' روز دارای برگه دستی')}${K('میانگین فاصله تا ثبت سیستمی',gp.length?fa(avg(gp,x=>x.g))+' روز':'—','اسناد دستی (ورود و خروج)؛ '+fa(gp.length)+' سند ثبت‌شده، '+fa(io.filter(r=>r.k!='سیستمی'&&r.st=='O').length)+' سند باز')}${K('حداکثر فاصله تا ثبت سیستمی',gm?fa(gm.g,0)+' روز':'—',gm?'سریال '+pd(gm.s):'')}</div><div class=sh><b>اسناد سیستمی انبار</b><span>SYSTEM</span></div><div class=k>${K('تعداد کل اسناد سیستمی',fa(sy.length),'',null,sy.length,'sys_total')}${K('اسناد خروجی (حواله)',fa(sy.filter(r=>r.t.startsWith('حواله')).length),'',null,sy.filter(r=>r.t.startsWith('حواله')).length,'sys_out')}${K('تعداد انواع سند',fa(new Set(sy.map(r=>r.t)).size),'',null,new Set(sy.map(r=>r.t)).size,'sys_types')}</div>
+$('#v').innerHTML=`<div class=sh><b>اسناد ورود و خروج انبار</b><span>INOUT</span></div><div class=k>${K('تعداد کل برگه‌های ورود و خروج',fa(io.length),'',null,io.length,'io_total')}${K('اسناد ورود دستی',fa(mi),'',null,mi,'io_manual_in')}${K('اسناد خروج دستی',fa(mo.length),'',null,mo.length,'io_manual_out')}${K('جدید/ویرایش‌شده از جمعه گذشته',fa(io.filter(r=>isNew(r.cr)).length),'از '+fd(LF)+' تا کنون',null,null,null,'openNewPop()')}${GA('میانگین زمان بارگیری (خروج)',avg(ld,r=>r.ld),'خروج')}${GA('میانگین زمان تخلیه (ورود)',avg(ul,r=>r.ld),'ورود')}${K('برگه دستی بدون سند سیستمی (سند باز)',fa(bo.length),'',bm.length?bo.length/bm.length*100:0,bo.length,'io_open')}${K('میانگین سند باز روزانه',fa(dz?bo.length/dz:0,1),fa(bo.length)+' سند باز ÷ '+fa(dz)+' روز دارای برگه دستی')}${K('میانگین فاصله تا ثبت سیستمی',gp.length?fa(avg(gp,x=>x.g))+' روز':'—','اسناد دستی (ورود و خروج)؛ '+fa(gp.length)+' سند ثبت‌شده، '+fa(io.filter(r=>r.k!='سیستمی'&&r.st=='O').length)+' سند باز')}</div><div class=sh><b>اسناد سیستمی انبار</b><span>SYSTEM</span></div><div class=k>${K('تعداد کل اسناد سیستمی',fa(sy.length),'',null,sy.length,'sys_total')}${K('اسناد خروجی (حواله)',fa(sy.filter(r=>r.t.startsWith('حواله')).length),'',null,sy.filter(r=>r.t.startsWith('حواله')).length,'sys_out')}${K('تعداد انواع سند',fa(new Set(sy.map(r=>r.t)).size),'',null,new Set(sy.map(r=>r.t)).size,'sys_types')}</div>
 <div class="r${(d=>d?' rh-'+d:'')(dirOf('io_','sys_'))}">${cd('روند '+g+' خروج دستی فاقد سند سیستمی (ثبت‌شده / سند باز)','f',260,'w','نحوه محاسبه: فقط «خروج دستی»؛ در ستون «وضعیت سند» موارد NONE حذف، YES = ثبت‌شده و خالی = سند باز، به تفکیک '+g+' بر اساس DATE. فاصله تا ثبت سیستمی = «تاریخ ثبت سند سیستمی» − DATE (روز) روی اسناد دستی (ورود و خروج) ثبت‌شده.')}<div class=c><h3>سهم هر انبار از اسناد — درخت‌نقشه</h3><div id=b style="position:relative;height:300px"></div></div>${cd('وسیله حمل','e')}<div class=c><h3>پرتردد‌ترین مبدا (ورود) — ۳ مورد اول</h3><div id=c></div></div><div class=c><h3>پرتردد‌ترین مقصد (خروج) — ۳ مورد اول</h3><div id=d></div></div>${cd('تعداد اسناد سیستمی به تفکیک انبار','h')}<div class=c><h3>تعداد هر نوع سند خروجی (حواله) از انبار — نمودار مارپیچ</h3><div id=i></div></div></div>
 <div class="r">${cd('نرخ رشد ماهانه — درصد حواله فروش با خروج دستی','hf',260,'w','به تفکیک ماه شمسی؛ درصد هر ماه = تعداد حواله‌های فروش با نوع «خروج دستی» در آن ماه ÷ تعداد کل حواله فروش ثبت‌شده در فایل SYSTEM در همان ماه.')}</div>`;
 {const e=tp(cnt(io,r=>r.w),20),tt=sm(e,x=>x[1]);tmap('b',e.map((x,i)=>({n:x[0],b:fa(x[1],0)+' ('+fa(x[1]/tt*100,0)+'٪)',t:x[0]+': '+fa(x[1],0),w:x[1],c:PL[i%8]})),600,300)}(e=>ch('e','bar',e.map(x=>x[0]),[{label:'تعداد اسناد',data:e.map(x=>x[1]),backgroundColor:PL,pct:true}]))(tp(cnt(io,r=>r.sh),12));rank('c',cnt(ul,r=>r.l));rank('d',cnt(ld,r=>r.l));
@@ -254,9 +321,6 @@ RAW.pl_count=a.length;RAW.pl_done=doneN;RAW.pl_ov=ovN;
 const paAct=futurePlanActivities(),paSplit=actSplit(paAct);
 $('#v').innerHTML=`<div class=sh><b>برنامه‌ریزی تولید</b><span>PLANING</span></div>
 <div class=k>${K('تعداد سفارش تولید',fa(a.length),'',null,a.length,'pl_count')}${K('جمع تعداد سفارش',fa(totQ,0))}${K('سفارش‌های تولیدشده',fa(doneN)+' از '+fa(a.length),'',null,doneN,'pl_done')}${K('عقب‌افتاده از تاریخ نیاز',fa(ovN),'',a.length?ovN/a.length*100:0,ovN,'pl_ov')}${K('جدید/ویرایش‌شده از جمعه گذشته',fa(a.filter(p=>isNew(p.cr)).length+(D.pa||[]).filter(x=>isNew(x.cr)).length),'از '+fd(LF)+' تا کنون',null,null,null,'openNewPop()')}</div>
-<div class=c style="margin-bottom:12px"><h3>فعالیت‌های برنامه‌ریزی‌شده آینده</h3>
-${actTable(paSplit.planned)}
-</div>
 <div class=c><div class=tw><table><tr>${J(['#','گروه محصول','محصول','تعداد سفارش','نوع سفارش','تاریخ نیاز','روز تا سررسید','اقلام MRP','اقلام EOQ','اقلام MinMax','اقلام تامین‌شده','تاریخ تخمینی تولید','وضعیت'].map(x=>`<th>${x}`))}${J(a.map(p=>`<tr${isNew(p.cr)?' class="nw-row"':''} style="cursor:pointer" onclick="openPlPop(${p.no})">${J([p.no,p.g,p.p,fa(p.q,0),p.ty,fd(p.nd),p.done?'—':(p.ov?fa(Math.abs(p.left),0)+' روز گذشته':fa(p.left,0)+' روز'),fa(p.mrp,0),fa(p.eoq,0),fa(p.mm,0),fa(p.sup,0),fd(p.ed),bd(...p.st)+nb(p.cr)].map(x=>`<td>${x}`))}`))}</table></div><div class=gi>برای دیدن جزئیات کامل هر محصول (مراحل، تاریخ‌ها و روش‌های برنامه‌ریزی)، روی سطر آن بزنید.</div></div>
 <div class="c" style="margin-bottom:12px"><h3>نمودار زمانی برنامه‌ریزی تولید (نارنجی = فعالیت‌های ثبت‌شده، بنفش = تخمین تولید، قرمز = تاریخ نیاز، سبز = تولید واقعی)</h3>${gantt(a.map(p=>({l:p.no+' - '+p.p,b:[[p.rd,p.pd||p.nd,p.done?'#10b981':'#3b82f6',p.done?'از دریافت سفارش تا تولید واقعی':'از دریافت سفارش تا تاریخ نیاز']],m:[...(D.pa||[]).filter(x=>x.no==p.no).map(x=>[x.d,'#f59e0b',fd(x.d)+' | '+x.a+(x.h?' | '+fa(x.h,1)+' ساعت':'')]),[p.nd,'#ef4444','تاریخ نیاز '+fd(p.nd)],...(p.ed&&p.ed!=p.nd?[[p.ed,'#a855f7','تخمین تولید '+fd(p.ed)]]:[]),...(p.pd?[[p.pd,'#10b981','تولید واقعی '+fd(p.pd)]]:[])]})),Math.min(...a.map(p=>p.rd)),Math.max(...a.map(p=>p.nd),...a.filter(p=>p.pd).map(p=>p.pd),R)+10)}</div>
 <div class=c><h3>مقایسه تعداد اقلام محاسبه‌شده به تفکیک روش برنامه‌ریزی سفارش</h3><div style="height:${Math.max(260,a.length*40)}px"><canvas id=j></canvas></div></div>`;
@@ -271,7 +335,6 @@ $('#v').innerHTML=`<p class=nt>ریسک: «بالا» اگر بودجه از س�
 <div class=c style="margin-bottom:12px"><h3>فعالیت‌های برنامه‌ریزی‌شده آینده</h3>
 ${actTable(oaSplit.planned)}
 </div>
-<div class=sh><b>آخرین فعالیت تخصیص‌داده‌شده هر سفارش</b><span>ORDER · Sheet2</span></div><div class=k style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))">${J(a.map(o=>`<div class=kc><b style="font-size:15px;margin:0 0 4px">${o.id} - ${o.t}</b><div style="border:1.5px solid var(--pr);background:rgba(37,99,235,.10);border-radius:8px;padding:8px 10px;margin:4px 0 8px;text-align:center;font-size:14px;font-weight:600;color:var(--tx)">${o.last?o.last.a:'فعالیتی ثبت نشده'}</div>${o.last?J([['تاریخ فعالیت',fd(o.last.d)],['زمان تخصیصی',fa(o.last.h,1)+' ساعت'],['روز از آخرین فعالیت',fa(dd(o.last.d,R),0)]].map(x=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid var(--bd)"><span>${x[0]}</span><b style="font-size:15px;margin:0">${x[1]}</b></div>`)):''}</div>`))}</div>
 <div class="r${(d=>d?' rh-'+d:'')(dirOf('od_'))}">${cd('بودجه زمانی: مصرف‌شده در برابر سقف (ساعت)','a',Math.max(260,a.length*44))}</div>
 <div class="c" style="margin-bottom:12px"><h3>نمودار زمانی هر سفارش کار (خط‌های نارنجی = فعالیت‌ها، خط قرمز باریک = تاریخ نیاز، خط عمودی قرمز = امروز)</h3>${gantt(a.map(o=>({l:o.id+' - '+o.t,b:[[o.s,o.la,'#3b82f6','شروع '+fd(o.s)+' تا آخرین فعالیت '+fd(o.la)],[o.la,o.nd,'#cbd5e1','تا تاریخ نیاز '+fd(o.nd)]],m:[...o.ac.map(x=>[x.d,'#f59e0b',fd(x.d)+' | '+x.a+' | '+x.h+' ساعت']),[o.nd,'#ef4444','تاریخ نیاز '+fd(o.nd)]]})),F.f||Math.min(...a.map(o=>o.s)),F.t||Math.max(...a.map(o=>o.nd),R)+10)}</div>
 <div class=c><div class=tw><table><tr>${J(['#','عنوان','درخواست‌کننده','شروع','تاریخ نیاز','بودجه (ساعت)','مصرف','٪ بودجه','آخرین فعالیت','زمان تخصیصی آخرین فعالیت (ساعت)','تاریخ آخرین فعالیت','روز از آخرین فعالیت','رکود (روز مازاد)','ریسک','علت'].map(x=>`<th>${x}`))}${J(a.map(o=>`<tr${isNew(o.cr)?' class="nw-row"':''} style="cursor:pointer" onclick="openOdPop(${o.id})">${J([o.id,o.t,o.rq,fd(o.s),fd(o.nd),fa(o.cap,0),fa(o.sp,0),`<span class=pb><i style="width:${Math.min(o.pc*100,100)}%;background:${o.pc>1?'#ef4444':''}"></i></span> ${fa(o.pc*100,0)}٪`,o.last?o.last.a:'—',o.last?fa(o.last.h,1):'—',fd(o.la),fa(o.idle,0),o.stag?bd(fa(o.stag,0),'hi'):bd('ندارد','lo'),bd(...o.r)+nb(o.cr),o.rs.join('، ')||'—'].map(x=>`<td>${x}`))}`))}</table></div><div class=gi>برای دیدن جزئیات کامل هر سفارش کار، روی سطر آن بزنید.</div></div>`;
@@ -288,9 +351,10 @@ const s=a.slice().sort((x,y)=>y.pct-x.pct);
 tmap('a',s.map(p=>({n:p.n,b:fa(p.pct*100,0)+'٪',t:p.n+': '+fa(p.pct*100,0)+'٪',w:Math.max(p.pct*100,4),c:`linear-gradient(135deg,hsl(${Math.round(p.pct*120)} 66% 50%),hsl(${Math.round(p.pct*120)} 62% 33%))`})),900,460)
 const um=new Map;a.forEach(p=>{um.set(p.u,[...(um.get(p.u)||[]),p.pct*100])});bar('c',[...um].map(([k,v])=>[k,+(v.reduce((x,y)=>x+y)/v.length).toFixed(0)]),'میانگین پیشرفت',1,0,'٪')}
 /* ---- هسته ---- */
+const TAB_ICONS=['<path d="M4 4h7v7H4zM13 4h7v4h-7zM13 11h7v9h-7zM4 14h7v6H4z"/>','<path d="M3 9l9-5 9 5v10a1 1 0 01-1 1H4a1 1 0 01-1-1z"/><path d="M8 20v-7h8v7"/>','<rect x="3" y="7" width="18" height="12" rx="1"/><path d="M7 7V5h10v2"/>','<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/>','<path d="M9 3h6l1 4H8z"/><path d="M5 7h14l-1.3 12.2a1 1 0 01-1 .8H7.3a1 1 0 01-1-.8z"/>','<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3h0a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5h0a1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9v0a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/>'];
 const TABS=[['نمای مدیریتی',T0],['انبار',T1],['تولید',T2],['برنامه‌ریزی تولید',T3],['سفارشات کار',T4],['سیستم‌ها و روش‌ها',T5]];let T=0;
 const render=()=>{gclean();TABS.forEach((t,i)=>$('#tb').children[i].classList.toggle('on',i==T));TABS[T][1]();GQ.splice(0).forEach(f=>f())};
-$('#tb').innerHTML=J(TABS.map((t,i)=>`<button onclick="T=${i};render()">${t[0]}</button>`));
+$('#tb').innerHTML=J(TABS.map((t,i)=>`<button onclick="T=${i};render()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${TAB_ICONS[i]}</svg><span>${t[0]}</span></button>`));
 $('#ca').onclick=()=>{Object.assign(F,{f:null,t:null,g:'d',wh:'',u:'',pr:''});$('#gg').value='d';$('#wh').value='';render()};
 $('#gg').onchange=e=>{F.g=e.target.value;render()};
 const ws=[...new Set([...D.io,...D.sys,...D.acc].map(r=>r.w))];$('#wh').innerHTML+=J(ws.map(w=>`<option>${w}`));$('#wh').onchange=e=>{F.wh=e.target.value;render()};
